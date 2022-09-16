@@ -8,6 +8,7 @@ public class PsoAlgorithm {
     public static double downlimit = 0;
     public static double vuplimit = 3;
     public static double vdownlimit = -3;
+    static int i = 0;
     public static void main(String[] args) {
         int size = 10;
         double population[] = initPopulation(uplimit,downlimit,size);
@@ -28,8 +29,8 @@ public class PsoAlgorithm {
         double bestLocation = population[1];
         double bestfLocation = f(bestLocation);
         for(;iter<=gen;iter++){
-            System.out.println("第"+iter+"代"+Arrays.toString(population));
-            System.out.println("    "+"第"+iter+"代"+Arrays.toString(curv));
+            //System.out.println("第"+iter+"代"+Arrays.toString(population));
+            //System.out.println("    "+"第"+iter+"代"+Arrays.toString(curv));
             for(int i = 0;i<size;i++){
                 fPopulation[i] = f(population[i]);//计算出适应度
             }
