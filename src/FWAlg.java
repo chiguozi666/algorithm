@@ -71,7 +71,7 @@ public class FWAlg {
         }
     }
     public static void PrintData(){
-        System.out.println("第"+times+++"轮"+"最好的xmax:"+xmax+"ymax:"+(-ymax+1000));
+        System.out.println("第"+times+++"轮"+"ymax:"+(-ymax+1000));
     }
     public static void initS_A(){
         double siSum = 0;//si分母累加的部分
