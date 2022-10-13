@@ -1,25 +1,34 @@
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class DOA {
+import static java.lang.Math.abs;
+
+class DOA {
+    public static void main(String[] args) {
+        new DOA(50, new CulFitness() {
+            @Override
+            public Double cul(List<Double> list) {
+                return FUtil.Sphere(list);
+            }
+        });
+    }
     double beta1 = -2+4*Math.random();
     double beta2 = -1+2*Math.random();
     int populationSize = 20;
-    public static final int iteration = 100000;
-    public static final double lb = 0;
-    public static final double ub = 50;
+    public static final int iteration = 10000;
+    public static final double lb = -10000;
+    public static final double ub = 100000;
 
-    public static final int dim = 50;
+    int dim;
     public static final double P = 0.5;//Hunting or Scavenger rate.
     public static final double Q = 0.7;//Group attack or persecution
     CulFitness culFitness = null;
-    int minAtk;//最小攻击数目
-    int maxAtk;//最大攻击数目 populationSize/minAtk
-    int willAtk;//Math.round(minAtk+(maxAtk-minAtk)*Math.random)
     List<List<Double>> dogs = new LinkedList<>();
-    double fitness[] = new double[populationSize];
-    public DOA(CulFitness culFitness){
+    double[] fitness = new double[populationSize];
+    public DOA(int dim,CulFitness culFitness){
+        this.dim = dim;
         this.culFitness = culFitness;
         int iter = 0;
         generate();
@@ -38,6 +47,7 @@ public class DOA {
                 //策略3
                 strage3();
             }
+            //策略4
             strage4();
             double fitnessMin = Double.MAX_VALUE;
             for(int i = 0; i < dogs.size();i++){
@@ -52,7 +62,7 @@ public class DOA {
         List<Double> bestdog = findBest();
         int na = 2 + (int)(Math.random()*(dogs.size()/2-2));
         int atkCount = 0;
-        boolean visit[] = new boolean[dogs.size()];
+        boolean[] visit = new boolean[dogs.size()];
         List<List<Double>> willAtkDogs = new LinkedList<>();
         while(atkCount<na){//设置即将攻击的狗群
             int index = (int)(dogs.size()*Math.random());
@@ -77,7 +87,8 @@ public class DOA {
                     }
                 }
                 for (int j = 0; j < dim; j++) {
-                    temp.set(j,temp.get(j)*beta1/na-bestdog.get(j));//eq2
+                    double x = temp.get(j)*beta1/na-bestdog.get(j);
+                    temp.set(j,getSuitLimitX(x));//eq2
                 }
                 dogs.set(i,temp);
                 fitness[i] = culFitness.cul(temp);
@@ -96,7 +107,8 @@ public class DOA {
             List<Double> curDog = dogs.get(i);
             double preCul = beta1*Math.exp(beta2);
             for (int j = 0; j < dim; j++) {//java的向量计算真烦;
-                curDog.set(j,preCul*(dogR.get(j)-curDog.get(j))+bestDog.get(j));//eq3
+                double x = preCul*(dogR.get(j)-curDog.get(j))+bestDog.get(j);
+                curDog.set(j,getSuitLimitX(x));//eq3
             }
             fitness[i] = culFitness.cul(curDog);
         }
@@ -113,7 +125,8 @@ public class DOA {
             double preCul = Math.exp(beta2);
             for (int j = 0; j < dim; j++) {//java的向量计算真烦;
                 int sigma = Math.random()<=0.5?1:-1;//eq4里面的(-1)^sigma
-                curDog.set(j,1.0/2.0*(preCul*dogR.get(j)-sigma*curDog.get(j)));//eq3
+                double x = 1.0/2.0*(preCul*dogR.get(j)-sigma*curDog.get(j));
+                curDog.set(j,getSuitLimitX(x));//eq4
             }
             fitness[i] = culFitness.cul(curDog);
         }
@@ -138,9 +151,10 @@ public class DOA {
                 List<Double> curDog = dogs.get(i);
                 List<Double> dogR1 = dogs.get(r1);
                 List<Double> dogR2 = dogs.get(r2);
-                for (int j = 0; j < dogs.size(); j++) {
+                for (int j = 0; j < dim; j++) {
                     int sigma = Math.random()<=0.5?1:-1;//eq4里面的(-1)^sigma
-                    curDog.set(j,bestDog.get(j)+0.5*(dogR1.get(j)-sigma*dogR2.get(j)));
+                    double x = bestDog.get(j)+0.5*(dogR1.get(j)-sigma*dogR2.get(j));
+                    curDog.set(j,getSuitLimitX(x));
                 }
                 fitness[i] = culFitness.cul(curDog);
             }
@@ -149,19 +163,23 @@ public class DOA {
     private List<Double> findBest(){
         List<Double> best = dogs.get(0);
         double bestFitness = culFitness.cul(best);
-        for (int i = 0; i < dogs.size(); i++) {
-            List<Double> dog = dogs.get(i);
+        for (List<Double> dog : dogs) {
             double curFitness = culFitness.cul(dog);//这里是最小化的
-            if(curFitness<bestFitness){//原文是最大化，说是fitness但是这里代码体现的是最小化
+            if (curFitness < bestFitness) {//原文是最大化，说是fitness但是这里代码体现的是最小化
                 bestFitness = curFitness;
                 best = dog;
             }
         }
         return best;
     }
+    private double getSuitLimitX(double x){
+        if (x > ub || x < lb) {//越界判断
+            x =  lb + abs(x) % (ub - lb);
+        }
+        return x;
+    }
     private void generate(){
         for (int i = 0; i < populationSize; i++) {
-            Double x[] = new Double[dim];
             List<Double> dog = new ArrayList<>(dim);
             for(int j = 0; j < dim; j++){
                 dog.add(j,lb + (ub - lb)*Math.random());
@@ -170,15 +188,8 @@ public class DOA {
             dogs.add(dog);
         }
     }
-    public static void main(String[] args) {
-        new DOA(new CulFitness() {
-            @Override
-            public Double cul(List<Double> List) {
-                return FUtil.Sphere(List);
-            }
-        });
-    }
+
     interface CulFitness{
-        public Double cul(List<Double> List);//通过坐标算出适应值
+        public Double cul(List<Double> list);//通过坐标算出适应值
     }
 }
