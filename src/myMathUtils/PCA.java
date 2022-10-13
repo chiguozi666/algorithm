@@ -5,7 +5,7 @@ import java.util.List;
 //用于数据降维
 public class PCA {
     private static final double threshold = 0.95;
-    public static double[][] getPCA(int n,List<List<Double>> input){
+    public static double[][] getPCA(int n,double[][] input){
         return Matrix.transpose(Data.getPCA(n,input));
     }
 
@@ -84,7 +84,7 @@ class Matrix {
             Q = Matrix.multiply(fact[0], Q);
             //Stop the loop if no eigenvalue changes by more than 1/100000
             for(int i = 0; i < copy.length; i++) {
-                if(Math.abs(newMat[i][i] - copy[i][i]) > 0.00001) {
+                if(Math.abs(newMat[i][i] - copy[i][i]) > 0.1) {//todo：精度必须解决
                     copy = newMat;
                     break;
                 } else if(i == copy.length - 1) { //End of copy table
@@ -456,15 +456,15 @@ class Data {
         System.out.println("Principal component transformation:");
         Matrix.print(Data.principalComponentAnalysis(data, 3));
     }
-    public static double[][] getPCA(int n, List<List<Double>> input){
-        double data[][] = new double[input.size()][input.get(0).size()];
-        for (int i = 0; i < input.size(); i++) {
-            List<Double> doubles = input.get(i);
-            for (int j = 0; j < input.get(0).size(); j++) {
-                data[i][j] = doubles.get(j);
-            }
-        }
-        return principalComponentAnalysis(data,n);
+    public static double[][] getPCA(int n, double[][] input){
+//        double data[][] = new double[input.size()][input.get(0).size()];
+//        for (int i = 0; i < input.size(); i++) {
+//            List<Double> doubles = input.get(i);
+//            for (int j = 0; j < input.get(0).size(); j++) {
+//                data[i][j] = doubles.get(j);
+//            }
+//        }
+        return principalComponentAnalysis(input,n);
     }
 
     /**

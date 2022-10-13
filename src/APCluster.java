@@ -11,18 +11,26 @@ public class APCluster {
     double lambda = 0.9;
     double[][] data;
     //用于获得分类
-    public static HashMap<Integer,List<List<Double>>> getAPC(List<List<Double>> data){
+    public static HashMap<Integer,List<Individual>> getAPC(List<Individual> individualList){
+        double[][] data = new double[individualList.size()][individualList.get(0).getPosition().size()];
+        for (int i = 0; i < individualList.size(); i++) {
+            Individual a = individualList.get(i);
+            List<Double> position = a.getPosition();
+            for (int j = 0; j < position.size(); j++) {
+                data[i][j] = position.get(j);
+            }
+        }
         double[][] pca= PCA.getPCA(3,data);
         APCluster apCluster = new APCluster(pca);
         int []result = apCluster.cul();
-        HashMap<Integer,List<List<Double>>> hashMap = new HashMap<Integer,List<List<Double>>>();
-        for (int i = 0; i < data.size(); i++) {
+        HashMap<Integer,List<Individual>> hashMap = new HashMap<>();
+        for (int i = 0; i < result.length; i++) {
             //hashMap.put(data.get(i),result[i]);
             if(hashMap.get(result[i])!=null){
-                hashMap.get(result[i]).add(data.get(i));
+                hashMap.get(result[i]).add(individualList.get(i));
             }else {
-                List<List<Double>> item = new LinkedList<>();
-                item.add(data.get(i));
+                List<Individual> item = new LinkedList<>();
+                item.add(individualList.get(i));
                 hashMap.put(result[i],item);
             }
             //System.out.println(total.get(i)+"  "+result[i]);
@@ -31,34 +39,32 @@ public class APCluster {
         return hashMap;
     }
     public static void main(String[] args) {
-        List<List<Double>> total = new ArrayList<>();
-        for (int i = 0; i <20; i++) {
-            List<Double> data = new ArrayList<>();
-            for (int j = 0; j < 100; j++) {
-                data.add(Math.random());
-            }
-            total.add(data);
-        }
-        HashMap hashMap2 = getAPC(total);
-        double[][] pca= PCA.getPCA(3,total);
-        APCluster apCluster = new APCluster(pca);
-        int []result = apCluster.cul();
-        HashMap<List,Integer> hashMap = new HashMap<>();
-        for (int i = 0; i < total.size(); i++) {
-            hashMap.put(total.get(i),result[i]);
-            //System.out.println(total.get(i)+"  "+result[i]);
-        }
-        total.sort(new Comparator<List<Double>>() {
-            @Override
-            public int compare(List<Double> o1, List<Double> o2) {
-                if(o1.get(0)>o2.get(0))return 1;
-                else if(o1.get(0)<o2.get(0))return -1;
-                else return 0;
-            }
-        });
-        for (int i = 0; i < total.size(); i++) {
-            System.out.println(total.get(i)+"  "+hashMap.get(total.get(i)));;
-        }
+//        double[][] total = new double[20][100];
+//        for (int i = 0; i <20; i++) {
+//            for (int j = 0; j < 100; j++) {
+//                total[i][j] = Math.random();
+//            }
+//        }
+//        HashMap hashMap2 = getAPC(total);
+//        double[][] pca= PCA.getPCA(3,total);
+//        APCluster apCluster = new APCluster(pca);
+//        int []result = apCluster.cul();
+//        HashMap<List,Integer> hashMap = new HashMap<>();
+//        for (int i = 0; i < total.size(); i++) {
+//            hashMap.put(total.get(i),result[i]);
+//            //System.out.println(total.get(i)+"  "+result[i]);
+//        }
+//        total.sort(new Comparator<List<Double>>() {
+//            @Override
+//            public int compare(List<Double> o1, List<Double> o2) {
+//                if(o1.get(0)>o2.get(0))return 1;
+//                else if(o1.get(0)<o2.get(0))return -1;
+//                else return 0;
+//            }
+//        });
+//        for (int i = 0; i < total.size(); i++) {
+//            System.out.println(total.get(i)+"  "+hashMap.get(total.get(i)));;
+//        }
     }
     //每个list记得等长
     public APCluster(double[][] data) {
