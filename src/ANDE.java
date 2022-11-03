@@ -8,20 +8,22 @@ import static java.lang.Math.random;
 public class ANDE {
     //List<List<Double>> population;
     List<Individual> population;
-    double ub = 100;
-    double lb = -100;
+    double ub = 1;
+    double lb = 0;
     int dim;
     int N;
     CulFitness culFitness;
     int FES = 0;
-    int MaxFES = 100000;
-    double F = 0.1;
-    double CR = 0.3;
+    int MaxFES = 10000;
+    //double F = 0.9;
+    double F = 0.9;
+    double CR = 0.1;
+    //double CR = 0.2;
     //HashMap<List<Double>,Double> fitnessMap;
     Random random = new Random();
 
     public static void main(String[] args) {
-        ANDE ande = new ANDE(20, 20, new CulFitness() {
+        ANDE ande = new ANDE(100, 10, new CulFitness() {
             @Override
             public Double cul(List<Double> list) {
                 return FUtil.Sphere(list);
@@ -36,7 +38,7 @@ public class ANDE {
         for (int i = 0; i < N; i++) {
             List list = new ArrayList(dim);
             for (int j = 0; j < dim; j++) {
-                list.add(Math.random());
+                list.add(lb+(ub-lb)*Math.random());
             }
             Individual individual = new Individual(list,culFitness(list));
             this.population.add(individual);
@@ -51,13 +53,32 @@ public class ANDE {
         this.dim = this.population.get(0).getPosition().size();
         this.culFitness = culFitness;
     }
+    //弱鸡版APC
+    public HashMap<Integer,List<Individual>> getAPC(List<Individual> population){
+        Collections.sort(population);
+        HashMap<Integer,List<Individual>> hashMap = new HashMap<>();
+        int nichesSize = 5;
+        List<Individual> niches[] = new List[nichesSize];
+        for (int i = 0; i < nichesSize; i++) {
+            niches[i] = new LinkedList<>();
+        }
+        for (int i = 0; i < population.size(); i++) {
+            int n = i%nichesSize;
+            niches[n].add(population.get(i));
+        }
+        for (int i = 0; i < 5; i++) {
+            hashMap.put(i,niches[i]);
+        }
+        return hashMap;
+    }
 
     public void findSolution(){
-        Collections.sort(population);
+        //Collections.sort(population);
         while(FES<=MaxFES){
             Individual curBest = population.get(0);
             //一个小生境的MAP，key是所属种类，Object是一个小生境里面的所有个体
-            HashMap<Integer,List<Individual>> nicheMap = APCluster.getAPC(population);//
+            //HashMap<Integer,List<Individual>> nicheMap = APCluster.getAPC(population);//
+            HashMap<Integer,List<Individual>> nicheMap = getAPC(population);
             HashMap<Integer,Double> nicheSeedMap = new HashMap<>();//记录每个小生境最好的仔
             for (Integer key:nicheMap.keySet()){
                 List<Individual> niche = nicheMap.get(key);
@@ -131,21 +152,23 @@ public class ANDE {
             };
 
             //"TLLS算法大显神威"
-            double sigma = Math.pow(10,-1.0-(10.0/dim+3.0)*FES/MaxFES);
+            //double sigma = Math.pow(10,-1.0-(10.0/dim+3.0)*FES/MaxFES);
+            //double sigma = Math.pow(10,-1.0-(10.0/dim+3.0)*FES/MaxFES);
+            double sigma = 1;
             HashMap<Integer,Double> nicheProbability = getNicheProbability(nicheSeedMap);
             for (Integer key: nicheMap.keySet()) {
                 if(Math.random()<nicheProbability.get(key)){
                     List<Individual> niche = nicheMap.get(key);//简简单单排个序
                     Collections.sort(niche);
                     for(int i = 0;i < niche.size();i++){
-                        if(random()<(double) i+1/niche.size()){//eq16
+                        if(random()<(double) (niche.size()-i)/niche.size()){//eq16
                             Individual father = niche.get(i);
                             Individual son1 = getGaussianSon(father,sigma);
                             Individual son2 = getGaussianSon(father,sigma);
                             if(son1.getFitness()>son2.getFitness()){
                                 son1 = son2;
                             }
-                            if(son1.getFitness()>father.getFitness()){
+                            if(son1.getFitness()<father.getFitness()){
                                 niche.set(i,son1);//儿子替代父亲
                             }
                         }
@@ -158,13 +181,14 @@ public class ANDE {
                 newPopulation.addAll(niche);
             }
             Collections.sort(newPopulation);//留下适应度高的babby
-            System.out.println(FES+"current best:"+newPopulation.get(0).getFitness()+"  "+newPopulation.get(0).getPosition());
+            //System.out.println(FES+"current best:"+newPopulation.get(0).getFitness()+"  "+newPopulation.get(0).getPosition());
+            System.out.println(FES+"current best:"+newPopulation.get(0).getFitness());
             population = newPopulation.subList(0,N);//切割
         }
     }
     public HashMap<Integer,Double> getNicheProbability(HashMap<Integer,Double> nicheSeedMap){
         Set<Integer> keySet = nicheSeedMap.keySet();
-        Integer[] table = new Integer[keySet.size()];//0号位置装 小神经编号，1号转fitness;
+        Integer[] table = new Integer[keySet.size()];
         int count = 0;
         for(Integer i:keySet){
             table[count] = i;
@@ -180,7 +204,7 @@ public class ANDE {
         });
         HashMap<Integer,Double> result = new HashMap<>();
         for (int i = 0; i < table.length; i++) {
-            result.put(table[i],(double)i/keySet.size());
+            result.put(table[i],(double)(keySet.size()-i)/keySet.size());
         }
         return result;
     }
@@ -190,7 +214,7 @@ public class ANDE {
         double fitness = -1;
         while(son==null||(generateTimes>0&&fitness<=father.getFitness())){//利用断路
             son = new ArrayList<>(dim);
-            if(random()<0.2){//DE/rand/1 mutation
+            if(random()<1){//DE/rand/1 mutation
                 int r1 = (int)(Math.random()*N);
                 int r2 = (int)(Math.random()*N);
                 int r3 = (int)(Math.random()*N);
@@ -202,7 +226,7 @@ public class ANDE {
                 List<Double> Xr2 = population.get(r2).getPosition();
                 List<Double> Xr3 = population.get(r3).getPosition();
                 int jRand = (int)(Math.random()*dim);
-                double CR = 0.5*(1+random());//0.5~1;//交叉算子
+                //double CR = 0.5*(1+random());//0.5~1;//交叉算子
                 for (int i = 0; i < dim; i++) {
                     if(random()<=CR||jRand==i){
                         double temp = Xr1.get(i)+F*(Xr2.get(i)-Xr3.get(i));
@@ -245,7 +269,15 @@ public class ANDE {
         List<Double> son = new ArrayList<>(dim);
         List<Double> fat = father.getPosition();
         for(int i = 0;i<dim;i++){
-            double temp = sigma * random.nextGaussian()+fat.get(i);
+//            if(random()<0.2){//todo:原本是没有random的
+//                double gaussian = random.nextGaussian();
+//                double temp = sigma * gaussian*fat.get(i)+fat.get(i);
+//                son.add(getSuitLimitX(temp));//eq(14a)
+//            }else {
+//                son.add(fat.get(i));
+//            }
+            double gaussian = random.nextGaussian();
+            double temp = sigma * gaussian*fat.get(i)+fat.get(i);
             son.add(getSuitLimitX(temp));//eq(14a)
         }
         return new Individual(son,culFitness(son));

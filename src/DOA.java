@@ -7,7 +7,7 @@ import static java.lang.Math.abs;
 
 class DOA {
     public static void main(String[] args) {
-        new DOA(50, new CulFitness() {
+        new DOA(100, new CulFitness() {
             @Override
             public Double cul(List<Double> list) {
                 return FUtil.Sphere(list);
@@ -192,4 +192,5 @@ class DOA {
     interface CulFitness{
         public Double cul(List<Double> list);//通过坐标算出适应值
     }
+
 }

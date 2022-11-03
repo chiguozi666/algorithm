@@ -12,12 +12,12 @@ public class APCluster {
     double[][] data;
     //用于获得分类
     public static HashMap<Integer,List<Individual>> getAPC(List<Individual> individualList){
-        double[][] data = new double[individualList.size()][individualList.get(0).getPosition().size()];
+        double[][] data = new double[individualList.get(0).getPosition().size()][individualList.size()];
         for (int i = 0; i < individualList.size(); i++) {
             Individual a = individualList.get(i);
             List<Double> position = a.getPosition();
             for (int j = 0; j < position.size(); j++) {
-                data[i][j] = position.get(j);
+                data[j][i] = position.get(j);
             }
         }
         double[][] pca= PCA.getPCA(3,data);
