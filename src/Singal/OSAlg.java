@@ -1,3 +1,5 @@
+package Singal;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -5,12 +7,12 @@ import static java.lang.Math.abs;
 import static java.lang.Math.random;
 
 public class OSAlg {
-    int dim = 50;
+    int dim = 30;
     int populationSize = 20;
     int gen = 0;
     int maxGen = 20000;
-    double ub = 1;
-    double lb = 0;
+    double ub = 500;
+    double lb = -500;
     double miu = 1.05;
     double sigma = random();//一个随机种子
 
@@ -21,6 +23,7 @@ public class OSAlg {
     private List<Individual> pop;
     public OSAlg(){
         init(populationSize);
+        double gobalMin = 0;
         while(gen<maxGen){
             update();
             double min = Double.MAX_VALUE;
@@ -30,7 +33,13 @@ public class OSAlg {
                     min = cur.fitness;
                 }
             }
-            System.out.println(gen+"  "+min);
+            if (gobalMin>min){
+                gobalMin = min;
+            }
+            if (gen%100==0){
+                System.out.println(123);
+            }
+            System.out.println(gen+"  "+gobalMin);
             gen++;
         }
     }
@@ -68,6 +77,7 @@ public class OSAlg {
                 minIndex = i;
             }
         }
+        sigma = random();
         sigma = miu*sigma*(1-sigma);
         List<Double> V = new ArrayList<>(dim);
         List<Double> originV = pop.get(minIndex).position;
@@ -85,7 +95,7 @@ public class OSAlg {
             Ii[i] = (max - pop.get(i).fitness)/(max - min);//越接近最优值越大
             Ici[i] = Ii[i]/R[i]+sigma;
         }
-        double beta = (1.0-gen/maxGen)*1.9;
+        double beta = (1.0-gen/maxGen)*1.9;//这个1.9应该可以改
         double alpha = random()/2.0;
         for (int i = 0; i < populationSize; i++) {
             List<Double> newOne = new ArrayList<>(dim);
@@ -103,7 +113,7 @@ public class OSAlg {
 
     }
     private double culFitness(List<Double> position){
-        return FUtil.Sphere(position);
+        return FUtil.F8(position);
     }
     private class Individual implements Comparable<Individual>{
         List<Double> position;

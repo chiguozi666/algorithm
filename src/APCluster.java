@@ -2,6 +2,8 @@ import myMathUtils.PCA;
 
 import java.util.*;
 
+import static java.lang.Math.random;
+
 public class APCluster {
     double a[][];
     double lastA[][];
@@ -39,6 +41,14 @@ public class APCluster {
         return hashMap;
     }
     public static void main(String[] args) {
+        double[][] i = new double[20][1];
+        for (int j = 0; j <20; j++) {
+            i[j][0] = 100*random();
+        }
+//
+        APCluster apCluster = new APCluster(i);
+        int []result = apCluster.cul();
+        System.out.println(1);
 //        double[][] total = new double[20][100];
 //        for (int i = 0; i <20; i++) {
 //            for (int j = 0; j < 100; j++) {

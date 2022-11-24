@@ -1,3 +1,5 @@
+package Singal;
+
 import static java.lang.Math.*;
 //模拟退火算法
 public class SimulatedAnnealingAlg {

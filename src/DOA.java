@@ -7,23 +7,23 @@ import static java.lang.Math.abs;
 
 class DOA {
     public static void main(String[] args) {
-        new DOA(100, new CulFitness() {
+        new DOA(30, new CulFitness() {
             @Override
             public Double cul(List<Double> list) {
-                return FUtil.Sphere(list);
+                return FUtil.F8(list);
             }
         });
     }
     double beta1 = -2+4*Math.random();
     double beta2 = -1+2*Math.random();
-    int populationSize = 20;
-    public static final int iteration = 10000;
-    public static final double lb = -10000;
-    public static final double ub = 100000;
+    int populationSize = 5;
+    public static final int iteration = 1000;
+    public static final double lb = -500;
+    public static final double ub = 500;
 
     int dim;
-    public static final double P = 0.5;//Hunting or Scavenger rate.
-    public static final double Q = 0.7;//Group attack or persecution
+    public static final double P = 1;//Hunting or Scavenger rate.
+    public static final double Q = 0;//Group attack or persecution
     CulFitness culFitness = null;
     List<List<Double>> dogs = new LinkedList<>();
     double[] fitness = new double[populationSize];
@@ -32,6 +32,7 @@ class DOA {
         this.culFitness = culFitness;
         int iter = 0;
         generate();
+        double gobalMin = Double.MAX_VALUE;
         while(iter<iteration){
             beta1 = -2+4*Math.random();
             beta2 = -1+2*Math.random();
@@ -53,7 +54,10 @@ class DOA {
             for(int i = 0; i < dogs.size();i++){
                 if(fitnessMin>fitness[i])fitnessMin = fitness[i];
             }
-            System.out.println(iter+"  "+fitnessMin);
+            if (fitnessMin<gobalMin){
+                gobalMin = fitnessMin;
+            }
+            System.out.println(iter+"  "+gobalMin);
             iter++;
         }
     }

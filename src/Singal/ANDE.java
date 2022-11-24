@@ -1,4 +1,4 @@
-import myMathUtils.PCA;
+package Singal;
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ public class ANDE {
         this.N = N;
     }
     //有data版本
-    public ANDE(List<Individual> preData,CulFitness culFitness){
+    public ANDE(List<Individual> preData, CulFitness culFitness){
         this.population = preData;
         this.N = this.population.size();
         this.dim = this.population.get(0).getPosition().size();
@@ -208,7 +208,7 @@ public class ANDE {
         }
         return result;
     }
-    public Individual getDERandSon(Individual father,Individual best){
+    public Individual getDERandSon(Individual father, Individual best){
         List<Double> son = null;//生成一个至少和父代一样的解
         int generateTimes = 1;//todo:这里可以加退火
         double fitness = -1;
@@ -265,7 +265,7 @@ public class ANDE {
         return new Individual(son,fitness);
     }
     //只创造一个son ， 不算fitness的;
-    public Individual getGaussianSon(Individual father,double sigma){
+    public Individual getGaussianSon(Individual father, double sigma){
         List<Double> son = new ArrayList<>(dim);
         List<Double> fat = father.getPosition();
         for(int i = 0;i<dim;i++){
