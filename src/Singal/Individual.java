@@ -1,5 +1,6 @@
 package Singal;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Individual implements Comparable<Individual>{
@@ -12,6 +13,17 @@ public class Individual implements Comparable<Individual>{
     public Individual(List<Double> position, Double fitness) {
         this.position = position;
         this.fitness = fitness;
+    }
+
+    @Override
+    protected Individual clone(){
+        List<Double> position = new ArrayList<>(this.position.size());
+        for (int i = 0; i < this.position.size(); i++) {
+            position.add(this.position.get(i));
+        }
+        Individual individual = new Individual(position);
+        individual.setFitness(this.fitness);
+        return individual;
     }
 
     public List<Double> getPosition() {
@@ -29,7 +41,6 @@ public class Individual implements Comparable<Individual>{
     public void setFitness(Double fitness) {
         this.fitness = fitness;
     }
-
     @Override
     public String toString() {
         return new String("fitness: "+fitness+" position: "+position);
