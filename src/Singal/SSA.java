@@ -170,8 +170,12 @@ public class SSA {
         double beta = random.nextGaussian();
         Individual globalBest = getGlobalBest();
         List<Double> globalBestPosition = globalBest.getPosition();
+        boolean visit[] = new boolean[pop];
         for (int i = 0; i < SDCount; i++) {
-            Individual individual = population.get(i);
+            int k = (int)(pop*random());//随机抽出一个
+            while(visit[k]) k = (int)(pop*random());
+            visit[k] = true;
+            Individual individual = population.get(k);
             List<Double> position = individual.getPosition();
             if(individual.getFitness()>globalBest.getFitness()){
                 for (int j = 0; j < dim; j++) {
