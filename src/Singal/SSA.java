@@ -26,16 +26,17 @@ public class SSA {
     Individual worst;
     Individual globalBest;
     Evaluator e;
-
+    PositionFactory positionFactory;
     public static void main(String[] args) {
         new SSA(100,new Evaluator(){
             @Override
             public double culFitness(Individual individual) {
-                return FUtil.F8(individual.position);
+                return FUtil.F8(individual.position.getData());
             }
         },30);
     }
     public SSA(int pop,Evaluator evaluator,int dim){
+        this.positionFactory = new PositionFactory(dim,ub,lb);
         this.pop =pop;
         this.e = evaluator;
         this.dim = dim;
@@ -89,12 +90,7 @@ public class SSA {
     public void Init(){
         population = new ArrayList<>(pop);
         for (int i = 0; i < pop; i++) {
-            List<Double> position = new ArrayList<>(dim);
-            for (int j = 0; j < dim; j++) {
-                double x = lb + (ub-lb)*random();
-                x = getSuitLimitX(x);
-                position.add(new Double(x));
-            }
+            Position position = this.positionFactory.initRandomPosition();
             Individual individual = new Individual(position);
             double Fitness = culFitness(individual);
             individual.setFitness(Fitness);
@@ -110,7 +106,7 @@ public class SSA {
         for (int i = 0; i < PDCount; i++) {
             double alpha = random();
             Individual individual = population.get(i);
-            List<Double> position = individual.getPosition();
+            Position position = individual.getPosition();
             double r2 = random();
             if(r2<ST){
                 for (int j = 0; j < dim; j++) {
@@ -120,10 +116,10 @@ public class SSA {
                     position.set(j,x);
                 }
             }else {
-                double Q = random.nextGaussian();//看看在里面还是外面
+                double Q = random.nextGaussian();
                 for (int j = 0; j < dim; j++) {
                     double x = position.get(j);
-                    x = x + Q;
+                    x = x + Q*x;
                     x = getSuitLimitX(x);
                     position.set(j,x);
                 }
@@ -134,11 +130,11 @@ public class SSA {
     //
     //更新发现者(发现危险的麻雀)
     public void UpdateScrounger(){
+        Position worstPosition = worst.getPosition();
+        Position p = best.getPosition();
         for (int i = PDCount; i < pop; i++) {
             Individual individual = population.get(i);
-            List<Double> position = individual.getPosition();
-            List<Double> worstPosition = worst.getPosition();
-            List<Double> p = best.getPosition();
+            Position position = individual.getPosition();
             double Q = random.nextGaussian();
             if(i > pop/2){
                 for (int j = 0; j < dim; j++) {
@@ -165,18 +161,18 @@ public class SSA {
         }
     }
     public void UpdateDetector(){
-        List<Double> gPosition = best.getPosition();
-        List<Double> wPosition = worst.getPosition();
+        Position gPosition = best.getPosition();
+        Position wPosition = worst.getPosition();
         double beta = random.nextGaussian();
         Individual globalBest = getGlobalBest();
-        List<Double> globalBestPosition = globalBest.getPosition();
+        Position globalBestPosition = globalBest.getPosition();
         boolean visit[] = new boolean[pop];
         for (int i = 0; i < SDCount; i++) {
             int k = (int)(pop*random());//随机抽出一个
             while(visit[k]) k = (int)(pop*random());
             visit[k] = true;
             Individual individual = population.get(k);
-            List<Double> position = individual.getPosition();
+            Position position = individual.getPosition();
             if(individual.getFitness()>globalBest.getFitness()){
                 for (int j = 0; j < dim; j++) {
                     double x = individual.getPosition().get(j);
@@ -223,7 +219,7 @@ public class SSA {
         //AT is controlling +- ,and (AAT)^-1 just 1/dim (= _=') silly boy
         double APlus[] = new double[dim];
         for (int i = 0; i < dim; i++) {//building random A 1 x dim;
-            APlus[i] = random()<0.5?1/dim:-1/dim;
+            APlus[i] = random()<0.5?1.0/dim:-1.0/dim;
         }
         return APlus;
     }
