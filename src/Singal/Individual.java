@@ -6,6 +6,7 @@ import java.util.List;
 public class Individual implements Comparable<Individual>{
     Position position;
     Double fitness;
+
     public Individual(Position position) {
         this.position = position;
     }
@@ -48,5 +49,8 @@ public class Individual implements Comparable<Individual>{
         double r = this.getFitness() - o.getFitness();
         if(r==0)return 0;
         return r>0?1:-1;
+    }
+    interface FitnessCulTor{
+        public double culFitness(Individual i);
     }
 }

@@ -8,7 +8,9 @@ public class PositionFactory {
     double ub;
     double lb;
     int dim;
-    public PositionFactory(int dim,double ub,double lb){
+    Individual.FitnessCulTor fitnessCulTor;
+    public PositionFactory(int dim, double ub, double lb, Individual.FitnessCulTor culTor){
+        this.fitnessCulTor = culTor;
         this.ub = ub;
         this.lb = lb;
         this.dim = dim;
@@ -24,6 +26,6 @@ public class PositionFactory {
         return new Position(a,ub,lb);
     }
     public Position buildEmpty(){
-        return new Position(dim);
+        return new Position(dim,lb,ub,lb);
     }
 }

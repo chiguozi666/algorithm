@@ -17,7 +17,7 @@ class DOA {
     double beta1 = -2+4*Math.random();
     double beta2 = -1+2*Math.random();
     int populationSize = 100;
-    public static final int iteration = 300000;
+    public static final int iteration = 1000;
     public static final double lb = -500;
     public static final double ub = 500;
 

@@ -35,10 +35,12 @@ public class Position{
             data.add(x);
         }
     }
-    public Position(int dim){
+    public Position(int dim,double value,double ub, double lb){
+        this.ub = ub;
+        this.lb = lb;
         this.data = new ArrayList<>(dim);
         for (int i = 0; i < dim; i++) {
-            this.data.add(lb);
+            this.data.add(value);
         }
     }
     public Position clone(){
