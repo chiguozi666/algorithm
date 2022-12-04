@@ -6,7 +6,6 @@ import java.util.List;
 public class Individual implements Comparable<Individual>{
     Position position;
     Double fitness;
-
     public Individual(Position position) {
         this.position = position;
     }

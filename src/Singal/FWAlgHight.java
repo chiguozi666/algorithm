@@ -43,12 +43,7 @@ public class FWAlgHight{
         iter = 100;
         temperature = 10000;
         vecDimension = 30;
-        this.positionFactory = new PositionFactory(vecDimension, upLimit, downLimit, new Individual.FitnessCulTor() {
-            @Override
-            public double culFitness(Individual i) {
-                return FUtil.F8(i.getPosition().getData());
-            }
-        });
+        this.positionFactory = new PositionFactory(vecDimension, upLimit, downLimit);
         while (iter-->0){
             initS_A();
             getSparkLoc();
@@ -205,6 +200,9 @@ public class FWAlgHight{
         }
 
         //Logger.getLogger(this.getClass()).log(Priority.ERROR,bestFirework.fitness);
+    }
+    private double updateFitness(Individual individual){
+        return FUtil.F8(individual.getPosition().getData());
     }
     private static double culDistance(Position a,Position b){
         int distance = 0;

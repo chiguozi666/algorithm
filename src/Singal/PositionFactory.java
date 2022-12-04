@@ -5,12 +5,11 @@ import java.util.List;
 import static java.lang.Math.random;
 
 public class PositionFactory {
-    double ub;
-    double lb;
-    int dim;
-    Individual.FitnessCulTor fitnessCulTor;
-    public PositionFactory(int dim, double ub, double lb, Individual.FitnessCulTor culTor){
-        this.fitnessCulTor = culTor;
+    private double ub;
+    private double lb;
+    private int dim;
+    private Individual.FitnessCulTor fitnessCulTor;
+    public PositionFactory(int dim, double ub, double lb){
         this.ub = ub;
         this.lb = lb;
         this.dim = dim;

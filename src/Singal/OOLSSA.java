@@ -33,7 +33,7 @@ public class OOLSSA {
     Individual best;
     Individual worst;
     Individual globalBest;
-
+    Individual.FitnessCulTor fitnessCulTor;
     PositionFactory positionFactory;
     public static void main(String[] args) {
         new OOLSSA(30, new Individual.FitnessCulTor() {
@@ -44,7 +44,8 @@ public class OOLSSA {
         },30);
     }
     public OOLSSA(int pop, Individual.FitnessCulTor fitnessCulTor, int dim){
-        this.positionFactory = new PositionFactory(dim,this.ub,this.lb,fitnessCulTor);
+        this.fitnessCulTor = fitnessCulTor;
+        this.positionFactory = new PositionFactory(dim,this.ub,this.lb);
         this.pop =pop;
         this.dim = dim;
         iterTimes = 0;
@@ -103,8 +104,7 @@ public class OOLSSA {
         for (int i = 0; i < pop; i++) {
             Position position = this.positionFactory.initRandomPosition();
             Individual individual = new Individual(position);
-            double Fitness = culFitness(individual);
-            individual.setFitness(Fitness);
+            updateFitness(individual);
             population.add(individual);
         }
         newPopulation = new ArrayList<>(pop);
@@ -123,7 +123,6 @@ public class OOLSSA {
                 for (int j = 0; j < dim; j++) {
                     double x = position.get(j);
                     x = x*Math.exp((double) -(i+1)/(alpha*maxIter));
-                    x = getSuitLimitX(x);
                     position.set(j,x);
                 }
             }else {
@@ -146,7 +145,6 @@ public class OOLSSA {
             double a = random.nextGaussian();
             double F = random()<0.5?-1:1;
             double x = p.get(j)*F*a;//高斯扰动
-            x = getSuitLimitX(x);
             Rp.set(j,x);
         }
         Position worstPosition = worst.getPosition();
@@ -158,7 +156,6 @@ public class OOLSSA {
                     double Q = random.nextGaussian();
                     double x = position.get(j);
                     x = Q*Math.exp((worstPosition.get(j)-position.get(j))/(i*i));
-                    x = getSuitLimitX(x);
                     position.set(j,x);
                 }
             }else {
@@ -173,7 +170,6 @@ public class OOLSSA {
                     double x = position.get(j);
                     double pX = Rp.get(j);
                     x = pX + Math.abs(x-pX)*aPlus[j];
-                    x = getSuitLimitX(x);
                     position.set(j,x);
                 }
             }
@@ -269,7 +265,6 @@ public class OOLSSA {
                     double x = individual.getPosition().get(j);
                     double xBest = globalBestPosition.get(j);
                     x = xBest + beta*Math.abs(x-xBest);
-                    x = getSuitLimitX(x);
                     position.set(j,x);
                 }
             }else if(individual.getFitness()==globalBest.getFitness()){
@@ -279,7 +274,6 @@ public class OOLSSA {
                     double x = individual.getPosition().get(j);
                     double K = random()*2 - 1;//k [-1,1]
                     x = x + K * (Math.abs(x-wPosition.get(j))/(fi-fw+epsilon));
-                    x = getSuitLimitX(x);
                     position.set(j,x);
                 }
             }
@@ -288,23 +282,11 @@ public class OOLSSA {
 
     }
     private void updateFitness(Individual individual){
-        double fitness = culFitness(individual);
+        double fitness = this.fitnessCulTor.culFitness(individual);
         individual.setFitness(fitness);
     }
 
-    public double culFitness(Individual individual){
-        return e.culFitness(individual);
-    }
-    //
-    interface Evaluator{
-        public double culFitness(Individual individual);
-    }
-    private double getSuitLimitX(double x){
-        if (x > ub || x < lb) {//越界判断
-            x =  lb + abs(x) % (ub - lb);
-        }
-        return x;
-    }
+
     //A+ * L;
     private double[] getAPlus(){
         //AT is controlling +- ,and (AAT)^-1 just 1/dim (= _=') silly boy
